@@ -27,9 +27,9 @@ RUN mkdir llvm-$LLVM_VERSION.src/.build && pushd llvm-$LLVM_VERSION.src/.build &
     make -j 8 install && \
     popd && rm -rf llvm*
 
-# put llvm/clang in the path
-ENV PATH=/opt/llvm/bin:$OLD_PATH
-
 # remove prereqs
 RUN yum remove -y xz
 RUN pip uninstall -y cmake
+
+# put llvm/clang in the path
+ENV PATH=/opt/llvm/bin:$OLD_PATH
