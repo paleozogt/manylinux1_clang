@@ -1,1 +1,1 @@
-Clang on 64-bit manylinux1 (aka Centos 5)
+Docker for Clang on manylinux1 (aka Centos 5)
