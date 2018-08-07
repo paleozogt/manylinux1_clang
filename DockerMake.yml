@@ -1,0 +1,47 @@
+# DockerMake file
+# see https://github.com/avirshup/DockerMake
+#
+
+paleozogt/manylinux1_x86_64_clang:
+    FROM: quay.io/pypa/manylinux1_x86_64
+    requires:
+        - clang
+
+paleozogt/manylinux1_i686_clang:
+    FROM: quay.io/pypa/manylinux1_i686
+    requires:
+        - clang
+
+clang:
+    build: |
+        ARG LLVM_VERSION=6.0.1
+        ARG LLVM_URL=https://releases.llvm.org/$LLVM_VERSION/llvm-$LLVM_VERSION.src.tar.xz
+        ARG CLANG_URL=https://releases.llvm.org/$LLVM_VERSION/cfe-$LLVM_VERSION.src.tar.xz
+
+        # use a non-ancient python
+        ARG OLD_PATH=$PATH
+        ENV PATH="/opt/python/cp27-cp27mu/bin:$PATH"
+
+        # prereqs
+        RUN yum -y install xz
+        RUN pip install cmake==3.6.3
+
+        # download llvm and clang
+        RUN python -c "from urllib import urlretrieve; urlretrieve('$LLVM_URL', 'llvm.src.tar.xz')"
+        RUN python -c "from urllib import urlretrieve; urlretrieve('$CLANG_URL', 'clang.src.tar.xz')"
+        RUN unxz *.xz && tar xvf llvm.src.tar && tar xvf clang.src.tar && rm -f *.tar && \
+            mv cfe-$LLVM_VERSION.src llvm-$LLVM_VERSION.src/tools/clang
+
+        # build llvm and clang
+        RUN mkdir llvm-$LLVM_VERSION.src/.build && pushd llvm-$LLVM_VERSION.src/.build && \
+            cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/llvm && \
+            make -j 8 && \
+            make -j 8 install && \
+            popd && rm -rf llvm*
+
+        # remove prereqs
+        RUN yum remove -y xz
+        RUN pip uninstall -y cmake
+
+        # put llvm/clang in the path
+        ENV PATH=/opt/llvm/bin:$OLD_PATH
