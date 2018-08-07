@@ -1,2 +1,1 @@
-# manylinux_x86_64_clang
-Clang on manylinux1_x86_64 (aka Centos 5)
+Clang on 64-bit manylinux1 (aka Centos 5)
